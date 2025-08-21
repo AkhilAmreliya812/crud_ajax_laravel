@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\country;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
-class StudentController extends Controller
-{
-    // public function studentForm() {
-    //     return view('home');
-    // }
+class StudentController extends Controller  {
 
     public function getStudents() {
         $students = Student::allStudents();
-
+    
        if($students->isNotEmpty()) {
             return response()->json([
                 'status' => 'success',
@@ -27,7 +24,6 @@ class StudentController extends Controller
     }
 
     public function addStudent(Request $request) {
-       
         $student = Student::addStudent($request->all());
 
         if($student) {

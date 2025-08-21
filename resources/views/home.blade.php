@@ -1,33 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student CRUD</title>
-
-    <!-- Bootstrap CSS -->
+    <title>Ajax CRUD</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-
 <body class="container py-4">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Student List</h2>
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-            + Add New Student
+            Add New Student
         </button>
     </div>
 
-    <!-- Student Table -->
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
+    <table class="table table-bordered">
+        <thead class="table-light text-center">
             <tr>
                 <th>Name</th>
                 <th>Email</th>
@@ -36,7 +26,7 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody id="studentList"></tbody>
+        <tbody id="studentList" class="text-center"></tbody>
         <tr id="noData" style="display: none;">
             <td colspan="5" class="text-center text-muted">No students found</td>
         </tr>
@@ -65,6 +55,7 @@
                             <label class="form-label">Phone</label>
                             <input type="text" name="phone" id="phone" class="form-control" required>
                         </div>
+                        
                         <div class="mb-3">
                             <label class="form-label">Address</label>
                             <textarea name="address" id="address" rows="3" class="form-control"></textarea>
@@ -98,9 +89,9 @@
     <div class="modal fade" id="editStudentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title">Edit Student</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-light">Edit Student</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="editStudentForm">
@@ -122,7 +113,7 @@
                             <label class="form-label">Address</label>
                             <textarea name="address" id="edit_address" rows="3" class="form-control"></textarea>
                         </div>
-                        <button id="updateBtn" class="btn btn-warning w-100">Update Student</button>
+                        <button id="updateBtn" class="btn btn-primary w-100">Update Student</button>
                     </form>
                 </div>
             </div>
@@ -136,9 +127,11 @@
 
             // Fetch student data
             function fetchData() {
+            
                 $.ajax({
                     url: "{{ route('getStudents') }}",
                     type: "GET",
+
                     success: function(response) {
                         let students = response.data;
                         let studentList = $('#studentList');
@@ -158,9 +151,9 @@
                   <td>${student.phone}</td>
                   <td>${student.address}</td>
                   <td>
-                    <button id="${student.id}" class="btn btn-warning btn-sm editBtn">Edit</button>
-                    <button id="${student.id}" class="btn btn-danger btn-sm deleteBtn">Delete</button>
                     <button id="${student.id}" class="btn btn-info btn-sm viewBtn">View</button>
+                    <button id="${student.id}" class="btn btn-primary btn-sm editBtn">Edit</button>
+                    <button id="${student.id}" class="btn btn-danger btn-sm deleteBtn">Delete</button>
                   </td>
                 </tr>`
                             );
@@ -188,7 +181,7 @@
                 });
             });
 
-            
+            // delete student
             $("#studentList").on('click', '.deleteBtn', function() {
                 let id = $(this).attr('id');
                 
@@ -225,7 +218,7 @@
                         let student = response.data;
                         $('#view_name').text(student.name);
                         $('#view_email').text(student.email);
-                        $('#edit_phone').text(student.phone);
+                        $('#view_phone').text(student.phone);
                         $('#view_address').text(student.address);
                         $('#viewStudentModal').modal('show');
                     },
@@ -263,6 +256,7 @@
                 });
             });
 
+            // update student
             $('#updateBtn').on('click', function(event) {
                 event.preventDefault();
                 let dataObj = new FormData($("#editStudentForm")[0]);
@@ -282,7 +276,5 @@
             });
         });
     </script>
-
 </body>
-
 </html>
