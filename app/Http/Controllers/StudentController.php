@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\country;
+use App\Models\City;
+use App\Models\Country;
+use App\Models\State;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
@@ -10,17 +12,36 @@ class StudentController extends Controller  {
 
     public function getStudents() {
         $students = Student::allStudents();
-    
-       if($students->isNotEmpty()) {
+        if($students) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'Students retrieved successfully.',
                 'data' => $students,
-                'code' => 200
             ]);
         } else {
-           return response()->json(['error' => 'No students found !']);
+            return response()->json(['error' => 'No students found !']);
         }
+    }
+
+    public function home() {
+        $students = Student::allStudents();
+        $countries = Country::allCountries();
+        return view('home', ['students' => $students,'countries' => $countries]);
+    }
+
+
+    public function getStates(Request $request) {
+        $states = State::allStates($request->country_id);
+        return response()->json([
+            'status' => 'success',
+            'data' => $states,
+        ]);
+    }
+    public function getCities(Request $request) {
+        $cities = City::allCities($request->state_id);
+        return response()->json([
+            'status' => 'success',
+            'data' => $cities,
+        ]);
     }
 
     public function addStudent(Request $request) {
@@ -29,18 +50,13 @@ class StudentController extends Controller  {
         if($student) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'Student addes successfully.',
                 'data' => $student,
-                'code' => 201
             ]);
-        } else {
-            return response()->json(['error' => 'Student not addesd !']);
         }
     }
 
     public function deleteStudent(Request $request) {
         $student = Student::findStudentById($request->id);
-        
         if($student) {
             $deletedStudent = Student::deleteStudent($request->id);
             if($deletedStudent) {

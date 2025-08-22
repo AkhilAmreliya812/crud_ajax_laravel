@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('students', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 50);
+            $table->string('email', 70)->unique();
+            $table->string('phone', 15);
+            $table->string('address', 255);
+            $table->foreignId('country')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('state')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('city')->nullable()->constrained()->onDelete('set null');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('students');
+    }
+};

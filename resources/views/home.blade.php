@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
+
 <body class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Student List</h2>
@@ -15,21 +17,45 @@
             Add New Student
         </button>
     </div>
-
     <table class="table table-bordered">
         <thead class="table-light text-center">
             <tr>
+                <th>Id</th>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
+                <th>Country</th>
+                <th>State</th>
+                <th>City</th>
                 <th>Address</th>
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody id="studentList" class="text-center"></tbody>
-        <tr id="noData" style="display: none;">
-            <td colspan="5" class="text-center text-muted">No students found</td>
-        </tr>
+        <tbody id="studentList" class="text-center">
+            @if ($students->isEmpty())
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No students found</td>
+                </tr>
+            @else
+                @foreach ($students as $student)
+                    <tr>
+                        <td>{{ $student->id }}</td>
+                        <td>{{ $student->name }}</td>
+                        <td>{{ $student->email }}</td>
+                        <td>{{ $student->phone }}</td>
+                        <td>{{ $student->country_name }}</td>
+                        <td>{{ $student->state_name }}</td>
+                        <td>{{ $student->city_name }}</td>
+                        <td>{{ $student->address }}</td>
+                        <td>
+                            <button id="{{ $student->id }}" class="btn btn-info btn-sm viewBtn">View</button>
+                            <button id="{{ $student->id }}" class="btn btn-primary btn-sm editBtn">Edit</button>
+                            <button id="{{ $student->id }}" class="btn btn-danger btn-sm deleteBtn">Delete</button>
+                        </td>
+                    </tr>
+                @endforeach
+            @endif
+        </tbody>
     </table>
 
     <!-- Add Student Modal -->
@@ -55,7 +81,35 @@
                             <label class="form-label">Phone</label>
                             <input type="text" name="phone" id="phone" class="form-control" required>
                         </div>
-                        
+
+                        {{-- Country --}}
+                        <div class="mb-3">
+                            <label class="form-label">Country</label>
+                            <select name="country" id="country" class="form-control" required>
+                                <option value="" disabled selected>Select Country</option>
+                                @foreach ($countries as $country)
+                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- state --}}
+                        <div class="mb-3">
+                            <label class="form-label">State</label>
+                            <select name="state" id="state" class="form-control" required>
+                                <option value="" disabled selected>Select State</option>
+                            </select>
+                        </div>
+
+                        {{-- City --}}
+                        <div class="mb-3">
+                            <label class="form-label">City</label>
+                            <select name="city" id="city" class="form-control" required>
+                                <option value="" disabled selected>Select City</option>
+                            </select>
+                        </div>
+                        {{-- drop down end --}}
+
                         <div class="mb-3">
                             <label class="form-label">Address</label>
                             <textarea name="address" id="address" rows="3" class="form-control"></textarea>
@@ -119,45 +173,43 @@
             </div>
         </div>
     </div>
-
     <script>
         $(document).ready(function() {
 
-            fetchData();
-
-            // Fetch student data
-            function fetchData() {
-            
+            function refreshStudentList() {
                 $.ajax({
-                    url: "{{ route('getStudents') }}",
+                    url: "{{ route('getStudents') }}", // Create a route to fetch all students
                     type: "GET",
-
                     success: function(response) {
                         let students = response.data;
-                        let studentList = $('#studentList');
-                        studentList.empty();
+                        $('#studentList').empty(); // Clear the table body
 
-                        if (!students || students.length === 0) {
-                            $('#noData').show();
-                            return;
+                        if (students.length === 0) {
+                            $('#studentList').append(`
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No students found</td>
+                    </tr>
+                `);
+                        } else {
+                            $.each(students, function(index, student) {
+                                $('#studentList').append(`
+                        <tr>
+                            <td>${student.name}</td>
+                            <td>${student.email}</td>
+                            <td>${student.phone}</td>
+                            <td>${student.address}</td>
+                            <td>
+                                <button id="${student.id}" class="btn btn-info btn-sm viewBtn">View</button>
+                                <button id="${student.id}" class="btn btn-primary btn-sm editBtn">Edit</button>
+                                <button id="${student.id}" class="btn btn-danger btn-sm deleteBtn">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                            });
                         }
-
-                        $('#noData').hide();
-                        $.each(students, function(index, student) {
-                            studentList.append(
-                                `<tr>
-                  <td>${student.name}</td>
-                  <td>${student.email}</td>
-                  <td>${student.phone}</td>
-                  <td>${student.address}</td>
-                  <td>
-                    <button id="${student.id}" class="btn btn-info btn-sm viewBtn">View</button>
-                    <button id="${student.id}" class="btn btn-primary btn-sm editBtn">Edit</button>
-                    <button id="${student.id}" class="btn btn-danger btn-sm deleteBtn">Delete</button>
-                  </td>
-                </tr>`
-                            );
-                        });
+                    },
+                    error: function() {
+                        alert('Error fetching student list');
                     }
                 });
             }
@@ -176,7 +228,7 @@
                     success: function() {
                         $("#studentForm")[0].reset();
                         $('#addStudentModal').modal('hide');
-                        fetchData();
+                        refreshStudentList();
                     }
                 });
             });
@@ -184,7 +236,7 @@
             // delete student
             $("#studentList").on('click', '.deleteBtn', function() {
                 let id = $(this).attr('id');
-                
+
                 $.ajax({
                     url: "{{ route('deleteStudent') }}",
                     type: "POST",
@@ -192,21 +244,18 @@
                         id: id,
                         _token: "{{ csrf_token() }}"
                     },
-                    success: function(response) {
-                        fetchData();
-                        alert(response.message);
+                    success: function() {
+                        refreshStudentList();
                     },
-                    error: function() {
-                        
-                    }
+
                 });
-               
+
             });
 
             // view Student
             $("#studentList").on('click', '.viewBtn', function() {
                 let id = $(this).attr('id');
-                
+
                 $.ajax({
                     url: "{{ route('viewStudent') }}",
                     type: "POST",
@@ -222,9 +271,6 @@
                         $('#view_address').text(student.address);
                         $('#viewStudentModal').modal('show');
                     },
-                    error: function() {
-                        
-                    }
                 });
             });
 
@@ -232,7 +278,7 @@
             $("#studentList").on('click', '.editBtn', function() {
 
                 let id = $(this).attr('id');
-                
+
                 $.ajax({
                     url: "{{ route('viewStudent') }}",
                     type: "POST",
@@ -250,9 +296,6 @@
                         $('#edit_address').val(student.address);
                         $('#editStudentModal').modal('show');
                     },
-                    error: function() {
-                        
-                    }
                 });
             });
 
@@ -270,11 +313,66 @@
                     success: function() {
                         $("#editStudentForm")[0].reset();
                         $('#editStudentModal').modal('hide');
-                        fetchData();
+                        refreshStudentList();
                     }
                 });
             });
+
+            // fetch states based on country
+
+            $('#country').on('change', function() {
+                let countryId = $(this).val();
+                $.ajax({
+                    url: "{{ route('getStates') }}",
+                    type: "POST",
+                    data: {
+                        country_id: countryId,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        console.log(response.data);
+                        let states = response.data;
+                        $('#state').empty();
+                        $('#state').append(
+                            `<option value="" disabled selected>Select State</option>`
+                        );
+                        $.each(states, function(index, state) {
+                            $('#state').append(
+                                `<option value="${state.id}">${state.name}</option>`
+                            );
+                        });
+                    },
+                });
+            });
+
+            // fetch cities based on state
+            $('#state').on('change', function() {
+                let stateId = $(this).val();
+                $.ajax({
+                    url: "{{ route('getCities') }}",
+                    type: "POST",
+                    data: {
+                        state_id: stateId,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        let cities = response.data;
+                        $('#city').empty();
+                        $('#city').append(
+                            `<option value="" disabled selected>Select City</option>`
+                        );
+                        $.each(cities, function(index, city) {
+                            $('#city').append(
+                                `<option value="${city.id}">${city.name}</option>`
+                            );
+                        });
+                    }
+                });
+            });
+
+
         });
     </script>
 </body>
+
 </html>
